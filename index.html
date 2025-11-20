@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>DOMAIN GRABBER PRO - LICENSE SYSTEM</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Roboto+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            background: radial-gradient(circle at center, #001100 0%, #000 70%);
+            color: #0f0;
+            font-family: 'Roboto Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        canvas {
+            position: fixed;
+            top:0; left:0;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            background: linear-gradient(90deg, #0f0, #0ff, #f0f, #0f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px #0f0;
+            animation: glow 2s infinite alternate, glitch 3s infinite;
+            margin: 40px 0;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            color: #0ff;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        .card {
+            background: rgba(0, 20, 0, 0.8);
+            border: 2px solid #0f0;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 900px;
+            box-shadow: 0 0 30px #0f0;
+            backdrop-filter: blur(10px);
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.2rem;
+            background: transparent;
+            color: #0f0;
+            border: 2px solid #0f0;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 30px #0f0;
+            transform: translateY(-5px);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; 
+            left: -100%;
+            width: 100%; 
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,0,0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before { left: 100%; }
+
+        .admin-btn { background: #f00; border-color: #f00; color: #fff; }
+        .admin-btn:hover { background: #ff0066; box-shadow: 0 0 40px #f00; }
+
+        code {
+            background: #001100;
+            padding: 15px;
+            border: 1px dashed #0f0;
+            display: block;
+            margin: 20px auto;
+            font-size: 1.1rem;
+            color: #0ff;
+            border-radius: 10px;
+            max-width: 800px;
+        }
+
+        table {
+            width: 100%;
+            margin: 30px 0;
+            border-collapse: separate;
+            border-spacing: 0 15px;
+        }
+
+        th {
+            background: linear-gradient(45deg, #003300, #006600);
+            padding: 15px;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            background: rgba(0, 50, 0, 0.6);
+            padding: 15px;
+            border: 1px solid #0f0;
+        }
+
+        .keybox {
+            background: linear-gradient(45deg, #001100, #003300);
+            padding: 25px;
+            font-size: 2rem;
+            margin: 30px 0;
+            border: 3px dashed #0ff;
+            border-radius: 20px;
+            animation: pulse 1.5s infinite;
+            color: #0ff;
+        }
+
+        .login-form {
+            background: rgba(0,0,0,0.9);
+            padding: 50px;
+            border-radius: 20px;
+            border: 2px solid #0f0;
+            max-width: 500px;
+            margin: 100px auto;
+        }
+
+        input[type="password"] {
+            width: 80%;
+            padding: 15px;
+            font-size: 1.5rem;
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #0f0; }
+            to { text-shadow: 0 0 40px #0f0, 0 0 60px #0f0; }
+        }
+
+        @keyframes glitch {
+            0%,100% { transform: translate(0); }
+            20% { transform: translate(-5px, 5px); }
+            40% { transform: translate(5px, -5px); }
+            60% { transform: translate(-5px, -5px); }
+            80% { transform: translate(5px, 5px); }
+        }
+
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="container">
+
+<?php
+// ==================== ADMIN PASSWORD ======================
+$ADMIN_PASS = "gasskeun2025";
+// ==========================================================
+
+$file = "data.json";
+if (!file_exists($file)) {
+    file_put_contents($file, json_encode(["keys" => []], JSON_PRETTY_PRINT));
+}
+
+$data  = json_decode(file_get_contents($file), true);
+$keys  = &$data['keys'];
+
+// ================== LICENSE API ============================
+if (isset($_POST['key']) || isset($_GET['key'])) {
+    header('Content-Type: application/json');
+    $key  = trim($_POST['key'] ?? $_GET['key']);
+    $hwid = trim($_POST['hwid'] ?? $_GET['hwid']);
+
+    if (!$key || !$hwid) {
+        echo json_encode(["status" => "error", "message" => "Key/HWID kosong!"]);
+        exit;
+    }
+
+    foreach ($keys as &$k) {
+        if ($k['key'] === $key) {
+
+            if ($k['status'] !== 'active') {
+                echo json_encode(["status" => "error", "message" => "License dibanned!"]);
+                exit;
+            }
+
+            if ($k['expires'] !== 'LIFETIME' && strtotime($k['expires']) < time()) {
+                echo json_encode(["status" => "error", "message" => "License kadaluarsa!"]);
+                exit;
+            }
+
+            if (empty($k['hwid'])) {
+                $k['hwid'] = $hwid;
+                $k['activated'] = date('Y-m-d H:i');
+                file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+                echo json_encode(["status" => "success", "message" => "License activated!"]);
+                exit;
+            }
+
+            if ($k['hwid'] !== $hwid) {
+                echo json_encode(["status" => "error", "message" => "Used on another device!"]);
+                exit;
+            }
+
+            echo json_encode(["status" => "success", "message" => "License valid!"]);
+            exit;
+        }
+    }
+
+    echo json_encode(["status" => "error", "message" => "Key tidak valid!"]);
+    exit;
+}
+
+// ================= ADMIN PANEL =============================
+if (isset($_GET['admin'])) {
+
+    // Login Check
+    if (!isset($_GET['pass']) || $_GET['pass'] !== $ADMIN_PASS) {
+        echo '
+        <div class="login-form">
+            <h1 style="font-size:3rem; animation: glow 1s infinite alternate">ACCESS DENIED</h1>
+            <h3>ADMIN LOGIN REQUIRED</h3><br>
+            <form>
+                <input type="password" name="pass" placeholder="Enter Master Password" required>
+                <button type="submit" class="btn admin-btn" style="font-size:1.5rem;padding:20px 40px">BREACH SYSTEM</button>
+            </form>
+        </div>';
+        exit;
+    }
+
+    // Generate Key
+    if (isset($_GET['buat'])) {
+        $days = $_GET['buat'];
+        $newkey = strtoupper(substr(bin2hex(random_bytes(10)), 0, 19));
+        $newkey = substr(chunk_split($newkey, 4, '-'), 0, 19);
+
+        $exp = $days == 9999 ? "LIFETIME" : date('d-m-Y', strtotime("+$days days"));
+
+        $keys[] = [
+            "key"      => $newkey,
+            "hwid"     => "",
+            "expires"  => $exp,
+            "status"   => "active",
+            "created"  => date('d-m-Y H:i')
+        ];
+
+        file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+
+        echo "<div class='keybox'>KEY GENERATED:<br><b style='font-size:2.5rem'>$newkey</b></div>";
+    }
+
+    // Reset / Ban / Unban / Hapus
+    if (isset($_GET['reset'])) foreach ($keys as &$k) if ($k['key']===$_GET['reset']) $k['hwid']="";
+    if (isset($_GET['ban']))   foreach ($keys as &$k) if ($k['key']===$_GET['ban']) $k['status']="banned";
+    if (isset($_GET['unban'])) foreach ($keys as &$k) if ($k['key']===$_GET['unban']) $k['status']="active";
+    if (isset($_GET['hapus'])) $keys = array_values(array_filter($keys, fn($k) => $k['key'] !== $_GET['hapus']));
+
+    file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+
+    // UI Admin
+    echo "<h1>ADMIN CONTROL PANEL</h1>";
+
+    echo "<div style='margin:30px'>";
+    echo "<a href='?admin&pass=$ADMIN_PASS&buat=30'><button class='btn'>30 Hari</button></a>";
+    echo "<a href='?admin&pass=$ADMIN_PASS&buat=90'><button class='btn'>90 Hari</button></a>";
+    echo "<a href='?admin&pass=$ADMIN_PASS&buat=365'><button class='btn'>1 Tahun</button></a>";
+    echo "<a href='?admin&pass=$ADMIN_PASS&buat=9999'>
+            <button class='btn' style='background:#ff00ff;color:#000;border-color:#ff00ff'>LIFETIME</button>
+          </a>";
+    echo "</div>";
+
+    echo "<table>
+            <tr>
+                <th>No</th>
+                <th>KEY</th>
+                <th>HWID</th>
+                <th>EXPIRES</th>
+                <th>STATUS</th>
+                <th>CONTROL</th>
+            </tr>";
+
+    foreach ($keys as $i => $k) {
+        $no = $i + 1;
+        $hwid = $k['hwid'] ?: '<i style="color:#666">Not Activated</i>';
+        $status = $k['status'] === 'active'
+            ? '<span style="color:#0f0;font-weight:bold">ACTIVE</span>'
+            : '<span style="color:#f00">BANNED</span>';
+
+        echo "<tr>
+                <td>$no</td>
+                <td><b style='color:#0ff;font-size:1.2rem'>{$k['key']}</b></td>
+                <td>$hwid</td>
+                <td>{$k['expires']}</td>
+                <td>$status</td>
+                <td>
+                    <a href='?admin&pass=$ADMIN_PASS&reset={$k['key']}'><button class='btn' style='padding:8px 15px'>Reset HWID</button></a> ";
+
+        echo $k['status'] === 'active'
+            ? "<a href='?admin&pass=$ADMIN_PASS&ban={$k['key']}'><button class='btn admin-btn' style='padding:8px 15px'>BAN</button></a>"
+            : "<a href='?admin&pass=$ADMIN_PASS&unban={$k['key']}'><button class='btn' style='background:#0f0;color:#000;padding:8px 15px'>UNBAN</button></a>";
+
+        echo " <a href='?admin&pass=$ADMIN_PASS&hapus={$k['key']}' onclick='return confirm(\"PERMANENT DELETE?\")'>
+                    <button class='btn admin-btn' style='padding:8px 15px;background:#800000'>DELETE</button>
+                </a>
+                </td>
+             </tr>";
+    }
+
+    echo "</table><br>
+          <a href='?'><button class='btn'>KEMBALI KE HOME</button></a>";
+
+    exit;
+}
+
+// ================= HOME PAGE ===============================
+?>
+
+<div class="card">
+    <h1>DOMAIN GRABBER PRO</h1>
+    <h3>Advanced License Protection System</h3>
+
+    <p style="margin:30px;font-size:1.3rem;color:#0ff">Copy URL ini ke script Python kamu:</p>
+
+    <code>LICENSE_SERVER = "<?= (isset($_SERVER['HTTPS'])?'https':'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ?>"</code>
+
+    <br><br><br>
+
+    <a href="?admin">
+        <button class="btn admin-btn" style="padding:25px 50px;font-size:1.8rem">MASUK ADMIN PANEL</button>
+    </a>
+</div>
+
+</div>
+
+<script>
+// Matrix Rain Effect
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+const fontSize = 14;
+const columns = canvas.width / fontSize;
+const rainDrops = [];
+
+for (let x = 0; x < columns; x++) {
+    rainDrops[x] = Math.floor(Math.random() * -100);
+}
+
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#0f0';
+    ctx.font = `${fontSize}px monospace`;
+
+    for (let i=0; i<rainDrops.length; i++) {
+        const text = matrix.charAt(Math.floor(Math.random() * matrix.length));
+        ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+        if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            rainDrops[i] = 0;
+        }
+        rainDrops[i]++;
+    }
+}
+
+setInterval(drawMatrix, 35);
+
+window.addEventListener('resize', () => {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
